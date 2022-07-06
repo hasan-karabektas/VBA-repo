@@ -1,0 +1,51 @@
+Sub Masterfile()
+Application.ScreenUpdating = False
+Dim ExcelFiles As String
+Dim count As Integer
+ExcelFiles = Dir("C:\Users\Hasan\Time_Registry\Weekly_TimeRegistryDoc\*.xlsx")
+Workbooks("MasterFileCollection").Activate
+Worksheets("CentralCollection").Select
+Range("a1").Activate
+Workbooks.Open "C:\Users\Hasan\Time_Registry\Weekly_TimeRegistryDoc\" & ExcelFiles
+Worksheets("WeeklyRegistry").Select
+Range("a1:d2").Select
+Selection.Copy
+    Workbooks("MasterFileCollection").Activate
+    Worksheets("CentralCollection").Select
+    Range("a1").PasteSpecial xlPasteAll
+    Range("e2") = "Week"
+    Range("c2").Select
+    Selection.Copy
+    Range("e2").Select
+        Selection.PasteSpecial Paste:=xlPasteFormats, Operation:=xlNone, _
+        SkipBlanks:=False, Transpose:=False
+    Application.CutCopyMode = False
+    Range("a1").Select
+    ActiveCell.Offset(2, 0).Activate
+    Workbooks(ExcelFiles).Close
+    Do While ExcelFiles <> ""
+    count = count + 1
+    Workbooks.Open "C:\Users\Hasan\Time_Registry\Weekly_TimeRegistryDoc\" & ExcelFiles
+    Worksheets("WeeklyRegistry").Select
+        Range("a3").Activate
+        Do While ActiveCell.Range("a1").Value <> "" And ActiveCell.Range("a1").Value <> "Total" And ActiveCell.Range("a1").Value <> "select your ID" 
+        ActiveCell.Range("a1:d1").Select
+        Selection.Copy
+        Workbooks("MasterFileCollection").Activate
+        Worksheets("CentralCollection").Select
+        ActiveCell.Range("a1:d1").PasteSpecial xlPasteValues
+        ActiveCell.Range("e1").Value = "Week " & count
+        ActiveCell.Offset(1, 0).Activate
+        Workbooks(ExcelFiles).Activate
+        Worksheets("WeeklyRegistry").Select
+        ActiveCell.Offset(1, 0).Activate
+        Loop
+            ActiveWorkbook.Close SaveChanges:=True
+    ExcelFiles = Dir
+    Loop
+Workbooks("MasterFileCollection").Activate
+Worksheets("CentralCollection").Select
+Columns("A:E").EntireColumn.AutoFit
+Columns("C:C").Select
+Selection.NumberFormat = "[h]:mm:ss"
+End Sub
