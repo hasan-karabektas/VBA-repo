@@ -1,0 +1,44 @@
+Option Explicit
+Sub Email_Html_dispatch()
+Dim E_mailing As Object
+Dim msgItem As Object
+On Error Resume Next
+Application.DisplayAlerts = False
+Set E_mailing = CreateObject("Outlook.Application")
+Set msgItem = E_mailing.CreateItem(0)
+Dim ws As Worksheet
+Set ws = Workbooks("StaffOverview.xlsm").Worksheets("Data")
+ws.Activate
+Dim tb As ListObject
+Set tb = ws.ListObjects("DataTable")
+Dim c As Range
+For Each c In tb.ListColumns(2).DataBodyRange
+    If c.Value = "Category A" And c.Offset(0, 7) <> "" Then  
+    Dim Addressee$, AddrEmail$, StaffName$, Agency$, Evaluation$
+    Addressee = c.Offset(0, 2).Value
+    AddrEmail = c.Offset(0, 3).Value
+    StaffName = c.Offset(0, -1).Value
+    Agency = c.Offset(0, 1).Value
+    Evaluation = c.Offset(0, 7).Value
+        Set msgItem = E_mailing.CreateItem(0)
+        With msgItem
+            .Display
+            .To = AddrEmail
+            .CC = "xxxxx.xxxxxxxx@gmail.com"
+            .Subject = "Periodical evaluation of: " & StaffName
+            .htmlbody = "Dear " & Addressee & "," & "<br><br>" _
+            & "We are hereby pleased to inform you that over the past days, as part of our periodical evaluation, we proceeded to a periodical performance assessment of our colleague " _
+            & "<b>" & StaffName & "</b>" & ", represented by your agency; " & Agency &  "." & "<br><br>" & "Please note that the overall conclusion and outcome of the evaluation was noted as follows:" & _
+            "<p style='font-family:arial;font-size:15'>" & "<b>" & Evaluation & "</b>" & "<br>" & "</p>" _
+            & "In case you would like to receive further information on the process, or to discuss over the overall situation regarding our cooperation with " & "<b>" & StaffName & "</b>" & _
+            ", please do not hesitate to get in touch with us." & "<br><br>" & "Best Regards." _
+            & .htmlbody
+            .Send
+        End With
+    End If        
+Next
+Set tb = Nothing
+Set ws = Nothing
+Set msgItem = Nothing
+Set E_mailing = Nothing
+End Sub
