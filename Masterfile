@@ -1,17 +1,38 @@
-Sub Masterfile()
+Option Explicit
+Sub Data_Gathering()
 Application.ScreenUpdating = False
 Dim ExcelFiles As String
-Dim count As Integer
-ExcelFiles = Dir("C:\Users\Hasan\Time_Registry\Weekly_TimeRegistryDoc\*.xlsx")
-Workbooks("MasterFileCollection").Activate
-Worksheets("CentralCollection").Select
+Dim count As Integer, i As Integer, Ws_Count As Integer, LastR&
+ExcelFiles = Dir("C:\Users\Hasan\Time_Registration\Weekly_Timesheets\2022\*.xlsx")
+
+Workbooks.Add.SaveAs Filename:="C:\Users\Hasan\Desktop\Gathering_Registred_Time.xlsx"
+Workbooks.Open Filename:="C:\Users\Hasan\Desktop\Gathering_Registred_Time.xlsx"
+Workbooks("Gathering_Registred_Time").Close
+Workbooks.Open Filename:="C:\Users\Hasan\Desktop\Gathering_Registred_Time.xlsx"
+Worksheets.Add After:=Sheets(Sheets.count)
+Sheets(Sheets.count).Name = "Projects"
+Worksheets.Add After:=Sheets(Sheets.count)
+Sheets(Sheets.count).Name = "Applications"
+Worksheets.Add After:=Sheets(Sheets.count)
+Sheets(Sheets.count).Name = "Other"
+Application.DisplayAlerts = False
+
+Do Until Sheets(1).Name = "Projects"
+If Workbooks("Gathering_Registred_Time").Sheets(1).Name <> "Projects" Then
+Sheets(1).Delete
+End If
+Loop
+
+Ws_Count = Workbooks("Gathering_Registred_Time").Sheets.count
+For i = 1 To Ws_Count
+Worksheets(i).Select
 Range("a1").Activate
-Workbooks.Open "C:\Users\Hasan\Time_Registry\Weekly_TimeRegistryDoc\" & ExcelFiles
-Worksheets("WeeklyRegistry").Select
+Workbooks.Open "C:\Users\Hasan\Time_Registration\Weekly_Timesheets\2022\" & ExcelFiles
+Worksheets("Cat_" & Workbooks("Gathering_Registred_Time").Worksheets(i).Name & "_TS").Select
 Range("a1:d2").Select
 Selection.Copy
-    Workbooks("MasterFileCollection").Activate
-    Worksheets("CentralCollection").Select
+    Workbooks("Gathering_Registred_Time").Activate
+    Sheets(i).Select
     Range("a1").PasteSpecial xlPasteAll
     Range("e2") = "Week"
     Range("c2").Select
@@ -20,32 +41,72 @@ Selection.Copy
         Selection.PasteSpecial Paste:=xlPasteFormats, Operation:=xlNone, _
         SkipBlanks:=False, Transpose:=False
     Application.CutCopyMode = False
+    Range("a1").Value = ActiveSheet.Name
+    Range("b1").Value = ""
     Range("a1").Select
     ActiveCell.Offset(2, 0).Activate
+Next i 
     Workbooks(ExcelFiles).Close
-    Do While ExcelFiles <> ""
+    
+Do While ExcelFiles <> ""
     count = count + 1
-    Workbooks.Open "C:\Users\Hasan\Time_Registry\Weekly_TimeRegistryDoc\" & ExcelFiles
-    Worksheets("WeeklyRegistry").Select
+    Workbooks.Open "C:\Users\Hasan\Time_Registration\Weekly_Timesheets\2022\" & ExcelFiles
+    Worksheets("Cat_Projects_TS").Select
         Range("a3").Activate
-        Do While ActiveCell.Range("a1").Value <> "" And ActiveCell.Range("a1").Value <> "Total" And ActiveCell.Range("a1").Value <> "select your ID" 
+        Do While ActiveCell.Range("a1").Value <> "" And ActiveCell.Range("a1").Value <> "Total" And ActiveCell.Range("a1").Value <> " select your name" And ActiveCell.Range("a1").Value <> "select your name" And ActiveCell.Range("a1").Value <> " Total"
         ActiveCell.Range("a1:d1").Select
         Selection.Copy
-        Workbooks("MasterFileCollection").Activate
-        Worksheets("CentralCollection").Select
-        ActiveCell.Range("a1:d1").PasteSpecial xlPasteValues
+        Workbooks("Gathering_Registred_Time").Activate
+        Worksheets("Projects").Select
+        LastR = Cells(Rows.count, 1).End(xlUp).Row + 1
+        Range("a" & LastR).PasteSpecial Paste:=xlPasteValues
         ActiveCell.Range("e1").Value = "Week " & count
-        ActiveCell.Offset(1, 0).Activate
         Workbooks(ExcelFiles).Activate
-        Worksheets("WeeklyRegistry").Select
+        Worksheets("Cat_Projects_TS").Select
         ActiveCell.Offset(1, 0).Activate
         Loop
-            ActiveWorkbook.Close SaveChanges:=True
-    ExcelFiles = Dir
-    Loop
-Workbooks("MasterFileCollection").Activate
-Worksheets("CentralCollection").Select
-Columns("A:E").EntireColumn.AutoFit
-Columns("C:C").Select
-Selection.NumberFormat = "[h]:mm:ss"
+        
+Workbooks(ExcelFiles).Activate
+Worksheets("Cat_Applications_TS").Select
+        Range("a3").Activate
+        Do While ActiveCell.Range("a1").Value <> "" And ActiveCell.Range("a1").Value <> "Total" And ActiveCell.Range("a1").Value <> " select your name" And ActiveCell.Range("a1").Value <> "select your name" And ActiveCell.Range("a1").Value <> " Total"
+        ActiveCell.Range("a1:d1").Select
+        Selection.Copy
+        Workbooks("Gathering_Registred_Time").Activate
+        Worksheets("Applications").Select
+        LastR = Cells(Rows.count, 1).End(xlUp).Row + 1
+        Range("a" & LastR).PasteSpecial Paste:=xlPasteValues
+        ActiveCell.Range("e1").Value = "Week " & count
+        Workbooks(ExcelFiles).Activate
+        Worksheets("Cat_Applications_TS").Select
+        ActiveCell.Offset(1, 0).Activate
+        Loop
+        
+Workbooks(ExcelFiles).Activate
+Worksheets("Cat_Other_TS").Select
+        Range("a3").Activate
+        Do While ActiveCell.Range("a1").Value <> "" And ActiveCell.Range("a1").Value <> "Total" And ActiveCell.Range("a1").Value <> " select your name" And ActiveCell.Range("a1").Value <> "select your name" And ActiveCell.Range("a1").Value <> " Total"
+        ActiveCell.Range("a1:d1").Select
+        Selection.Copy
+        Workbooks("Gathering_Registred_Time").Activate
+        Worksheets("Other").Select
+        LastR = Cells(Rows.count, 1).End(xlUp).Row + 1
+        Range("a" & LastR).PasteSpecial Paste:=xlPasteValues
+        ActiveCell.Range("e1").Value = "Week " & count
+        Workbooks(ExcelFiles).Activate
+        Worksheets("Cat_Other_TS").Select
+        ActiveCell.Offset(1, 0).Activate
+        Loop       
+Workbooks(ExcelFiles).Close SaveChanges:=False
+ExcelFiles = Dir()
+Loop
+
+Workbooks("Gathering_Registred_Time").Activate
+For i = 1 To Ws_Count
+    Worksheets(i).Select
+    Columns("A:E").EntireColumn.AutoFit
+    Columns("C:C").Select
+    Selection.NumberFormat = "[h]:mm:ss"
+Next i
+MsgBox "Masterfile Data Collection Completed - " & Now(), vbInformation, "Operation Status"
 End Sub
