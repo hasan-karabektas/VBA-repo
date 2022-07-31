@@ -1,0 +1,41 @@
+Option Explicit
+
+Public Function CheckDeadline(End_Period As Date) As Boolean
+If End_Period <= DateAdd("d", 30, Date) And End_Period > Date Then
+CheckDeadline = True
+Else
+CheckDeadline = False
+End If
+End Function
+
+Sub Verification_Expiry_Date()
+Dim ws As Worksheet
+Dim tbl As ListObject, c As Range, i As Date
+Dim olapp, olmail As Object
+Set ws = ThisWorkbook.Worksheets("Licence_Subscriptions")
+Set tbl = ws.ListObjects("Table_Subscriptions")
+Set olapp = CreateObject("Outlook.Application")
+For Each c In tbl.ListColumns(16).DataBodyRange
+    i = c.Value
+    If c.Offset(0, 1).Value = "" And CheckDeadline(i) = True Then
+    c.Offset(0, 1).Value = "Email Notification Sent on: " & Now()
+    Set olmail = olapp.CreateItem(0)
+    Dim Supplier$, Descript$, Deadline As Date
+    Supplier = c.Offset(0, -10).Value
+    Descrip = c.Offset(0, -11).Value  
+    With olmail
+        .To = "hasan.karabektas.be@gmail.com"
+        .Subject = "Service Period End Date approaches: " & Supplier & "-product"
+        .Body = "Dear Colleague," & vbNewLine & vbNewLine & _
+        "Please be notified that the service period deadline is going to be reached within less than 30 days for the following product:" & _
+        vbNewLine & vbNewLine & vbNewLine & "Supplier: " & Supplier & vbNewLine & vbNewLine & _
+        "Description: " & Descript & vbNewLine & vbNewLine & _
+        "Deadline : " & i & vbNewLine & vbNewLine & vbNewLine & _
+        "Best Regards"
+        .Send
+    End With
+    End If
+Next
+Set tbl = Nothing
+Set ws = Nothing
+End Sub
