@@ -1,5 +1,5 @@
 Option Explicit
-
+Option Base 1
 Public Function CheckDeadline(End_Period As Date) As Boolean
 If End_Period <= DateAdd("d", 30, Date) And End_Period > Date Then
 CheckDeadline = True
