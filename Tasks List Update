@@ -22,5 +22,6 @@ Next
 ActiveCell.Range("B1").Select
 Exit Sub
 err_handler:
-MsgBox "Unexpected Error: " & Err.Description & ". - " & Err.Number, vbCritical
+MsgBox "Unexpected Error: " & Err.Description & ". - " & Err.Number, vbCritical 
+
 End Sub
