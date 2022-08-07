@@ -1,0 +1,24 @@
+Sub HideCompletedTasks()
+Dim Nr As Integer
+On Error GoTo err_handler
+Range("i2").Select
+        Do While Selection.Value <> ""
+            If ActiveCell.Value = "Completed" Then
+            Rows(ActiveCell.Row).Select
+            Selection.EntireRow.Hidden = True
+            ActiveCell.Offset(1, 8).Select
+            ElseIf ActiveCell.Value = "" Then
+            ActiveCell.Offset(1, -7).Select
+            Exit Do
+            Else: ActiveCell.Offset(1, 0).Select
+            End If
+        Loop
+For Nr = 1 To InputBox("# of Rows to Add", "Add Rows to Table")
+    ActiveCell.Rows("1:1").EntireRow.Select
+    Selection.Insert Shift:=xlDown
+Next
+ActiveCell.Range("B1").Select
+Exit Sub
+err_handler:
+MsgBox "Unexpected Error: " & Err.Description & ". - " & Err.Number, vbCritical
+End Sub
