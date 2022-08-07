@@ -1,112 +1,130 @@
-Option Explicit
-Sub Data_Gathering()
+Sub Masterfile()
 Application.ScreenUpdating = False
-Dim ExcelFiles As String
-Dim count As Integer, i As Integer, Ws_Count As Integer, LastR&
-ExcelFiles = Dir("C:\Users\Hasan\Time_Registration\Weekly_Timesheets\2022\*.xlsx")
-
-Workbooks.Add.SaveAs Filename:="C:\Users\Hasan\Desktop\Gathering_Registred_Time.xlsx"
-Workbooks.Open Filename:="C:\Users\Hasan\Desktop\Gathering_Registred_Time.xlsx"
-Workbooks("Gathering_Registred_Time").Close
-Workbooks.Open Filename:="C:\Users\Hasan\Desktop\Gathering_Registred_Time.xlsx"
-Worksheets.Add After:=Sheets(Sheets.count)
-Sheets(Sheets.count).Name = "Projects"
-Worksheets.Add After:=Sheets(Sheets.count)
-Sheets(Sheets.count).Name = "Applications"
-Worksheets.Add After:=Sheets(Sheets.count)
-Sheets(Sheets.count).Name = "Other"
 Application.DisplayAlerts = False
 
+Dim ExcelFiles As String, c As Range, prlast&, applast&, othlast&
+Dim count As Long, i As Long, Ws_Count As Integer, LastR&, AddWb%
+
+ExcelFiles = Dir("C:\Users\Hasan\Time_Registration\Weekly_Registration\2022\*.xlsx")
+
+Workbooks.Add.SaveAs Filename:="C:\Users\Hasan\Desktop\2022-DataCollect.xlsx"
+Workbooks.Open Filename:="C:\Users\Hasan\Desktop\2022-DataCollect.xlsx"
+
+For AddWb = 1 To 3
+    Worksheets.Add After:=Sheets(Sheets.count)
+    Select Case AddWb
+    Case 1: Workbooks("2022-DataCollect").ActiveSheet.Name = "Projects"
+    Case 2: Workbooks("2022-DataCollect").ActiveSheet.Name = "Applications"
+    Case 3: Workbooks("2022-DataCollect").ActiveSheet.Name = "Other"
+    End Select
+Next AddWb
+
 Do Until Sheets(1).Name = "Projects"
-If Workbooks("Gathering_Registred_Time").Sheets(1).Name <> "Projects" Then
+If Workbooks("2022-DataCollect").Sheets(1).Name <> "Projects" Then
 Sheets(1).Delete
 End If
 Loop
 
-Ws_Count = Workbooks("Gathering_Registred_Time").Sheets.count
+
+Ws_Count = Workbooks("2022-DataCollect").Sheets.count
+Workbooks.Open "C:\Users\Hasan\Time_Registration\Weekly_Registration\2022\" & ExcelFiles, UpdateLinks:=0
+
 For i = 1 To Ws_Count
-Worksheets(i).Select
-Range("a1").Activate
-Workbooks.Open "C:\Users\Hasan\Time_Registration\Weekly_Timesheets\2022\" & ExcelFiles
-Worksheets("Cat_" & Workbooks("Gathering_Registred_Time").Worksheets(i).Name & "_TS").Select
-Range("a1:d2").Select
-Selection.Copy
-    Workbooks("Gathering_Registred_Time").Activate
-    Sheets(i).Select
-    Range("a1").PasteSpecial xlPasteAll
-    Range("e2") = "Week"
-    Range("c2").Select
-    Selection.Copy
-    Range("e2").Select
-        Selection.PasteSpecial Paste:=xlPasteFormats, Operation:=xlNone, _
-        SkipBlanks:=False, Transpose:=False
+    With Workbooks(ExcelFiles).Worksheets(Workbooks("2022-DataCollect").Worksheets(i).Name)
+    .Activate
+    .Range("a1:d2").Copy
+    End With
+    With Workbooks("2022-DataCollect").Sheets(i)
+    .Activate
+    .Range("a1").PasteSpecial xlPasteAll
+    .Range("e2").Value = "Week"
+    .Range("c2").Copy
+    .Cells(2, 5).PasteSpecial Paste:=xlPasteFormats, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
     Application.CutCopyMode = False
-    Range("a1").Value = ActiveSheet.Name
-    Range("b1").Value = ""
-    Range("a1").Select
-    ActiveCell.Offset(2, 0).Activate
-Next i 
+    .Range("a1").Value = ActiveSheet.Name
+    .Range("b1").Value = ""
+    .Range("a1").Offset(2, 0).Activate
+    End With
+Next i
     Workbooks(ExcelFiles).Close
     
+'HERE START DATA IMPORT AND CENTRALIZATION
 Do While ExcelFiles <> ""
-    count = count + 1
-    Workbooks.Open "C:\Users\Hasan\Time_Registration\Weekly_Timesheets\2022\" & ExcelFiles
-    Worksheets("Cat_Projects_TS").Select
-        Range("a3").Activate
-        Do While ActiveCell.Range("a1").Value <> "" And ActiveCell.Range("a1").Value <> "Total" And ActiveCell.Range("a1").Value <> " select your name" And ActiveCell.Range("a1").Value <> "select your name" And ActiveCell.Range("a1").Value <> " Total"
-        ActiveCell.Range("a1:d1").Select
+count = count + 1
+Workbooks.Open "C:\Users\Hasan\Time_Registration\Weekly_Registration\2022\" & ExcelFiles, UpdateLinks:=0, ReadOnly:=1
+    
+Worksheets("HD_Projects_TS").Select
+
+prlast = Cells(Rows.count, 1).End(xlUp).Row
+For Each c In Range("a2:a" & prlast)
+    If c.Value <> "" And c.Value <> "Total" And c.Value <> "Name of collaborator" And c.Value <> "ID" And c.Value <> "select your name" Then
+     c.Resize(1, 4).Select
         Selection.Copy
-        Workbooks("Gathering_Registred_Time").Activate
+        With Workbooks("2022-DataCollect").Worksheets("Projects")
+        .Activate
+        .Cells(1, 1).Select
+        LastR = Workbooks("2022-DataCollect").Worksheets("Projects").Cells(1, 1).End(xlDown).Row + 1
+        .Range("a" & LastR).PasteSpecial Paste:=xlPasteValues
+        .Range("a" & LastR).Offset(0, 4).Value = "Week " & count
+        End With
+        Workbooks(ExcelFiles).Activate
         Worksheets("Projects").Select
-        LastR = Cells(Rows.count, 1).End(xlUp).Row + 1
-        Range("a" & LastR).PasteSpecial Paste:=xlPasteValues
-        ActiveCell.Range("e1").Value = "Week " & count
-        Workbooks(ExcelFiles).Activate
-        Worksheets("Cat_Projects_TS").Select
-        ActiveCell.Offset(1, 0).Activate
-        Loop
-        
-Workbooks(ExcelFiles).Activate
-Worksheets("Cat_Applications_TS").Select
-        Range("a3").Activate
-        Do While ActiveCell.Range("a1").Value <> "" And ActiveCell.Range("a1").Value <> "Total" And ActiveCell.Range("a1").Value <> " select your name" And ActiveCell.Range("a1").Value <> "select your name" And ActiveCell.Range("a1").Value <> " Total"
-        ActiveCell.Range("a1:d1").Select
+    End If
+Next c
+
+
+Workbooks(ExcelFiles).Worksheets("Applications").Activate
+applast = Cells(Rows.count, 1).End(xlUp).Row
+For Each c In Range("a2:a" & applast)
+    If c.Value <> "" And c.Value <> "Total" And c.Value <> "Name of collaborator" And c.Value <> "ID" And c.Value <> "select your name" Then
+     c.Resize(1, 4).Select
         Selection.Copy
-        Workbooks("Gathering_Registred_Time").Activate
+        With Workbooks("2022-DataCollect").Worksheets("Applications")
+        .Activate
+        .Cells(1, 1).Select
+        LastR = Workbooks("2022-DataCollect").Worksheets("Applications").Cells(1, 1).End(xlDown).Row + 1
+        .Range("a" & LastR).PasteSpecial Paste:=xlPasteValues
+        .Range("a" & LastR).Offset(0, 4).Value = "Week " & count
+        End With
+        Workbooks(ExcelFiles).Activate
         Worksheets("Applications").Select
-        LastR = Cells(Rows.count, 1).End(xlUp).Row + 1
-        Range("a" & LastR).PasteSpecial Paste:=xlPasteValues
-        ActiveCell.Range("e1").Value = "Week " & count
-        Workbooks(ExcelFiles).Activate
-        Worksheets("Cat_Applications_TS").Select
-        ActiveCell.Offset(1, 0).Activate
-        Loop
-        
-Workbooks(ExcelFiles).Activate
-Worksheets("Cat_Other_TS").Select
-        Range("a3").Activate
-        Do While ActiveCell.Range("a1").Value <> "" And ActiveCell.Range("a1").Value <> "Total" And ActiveCell.Range("a1").Value <> " select your name" And ActiveCell.Range("a1").Value <> "select your name" And ActiveCell.Range("a1").Value <> " Total"
-        ActiveCell.Range("a1:d1").Select
+    End If
+Next c
+
+Workbooks(ExcelFiles).Worksheets("HD_Other_TS").Activate
+othlast = Cells(Rows.count, 1).End(xlUp).Row
+For Each c In Range("a2:a" & othlast)
+    If c.Value <> "" And c.Value <> "Total" And c.Value <> "Name of collaborator" And c.Value <> "ID" And c.Value <> "select your name" Then
+     c.Resize(1, 4).Select
         Selection.Copy
-        Workbooks("Gathering_Registred_Time").Activate
-        Worksheets("Other").Select
-        LastR = Cells(Rows.count, 1).End(xlUp).Row + 1
-        Range("a" & LastR).PasteSpecial Paste:=xlPasteValues
-        ActiveCell.Range("e1").Value = "Week " & count
+        With Workbooks("2022-DataCollect").Worksheets("Other")
+        .Activate
+        .Cells(1, 1).Select
+        LastR = Workbooks("2022-DataCollect").Worksheets("Other").Cells(1, 1).End(xlDown).Row + 1
+        .Range("a" & LastR).PasteSpecial Paste:=xlPasteValues
+        .Range("a" & LastR).Offset(0, 4).Value = "Week " & count
+        End With
         Workbooks(ExcelFiles).Activate
-        Worksheets("Cat_Other_TS").Select
-        ActiveCell.Offset(1, 0).Activate
-        Loop       
-Workbooks(ExcelFiles).Close SaveChanges:=False
+        Worksheets("Other").Select
+    End If
+Next c
+
+
+Workbooks(ExcelFiles).Close
 ExcelFiles = Dir()
+
 Loop
 
-Workbooks("Gathering_Registred_Time").Activate
+Workbooks("2022-DataCollect").Activate
 For i = 1 To Ws_Count
-    Worksheets(i).Select
-    Columns("A:E").EntireColumn.AutoFit
-    Columns("C:C").Select
+    With Worksheets(i)
+    .Activate
+    .Range("A:E").EntireColumn.AutoFit
+    .Range("C:C").Select
     Selection.NumberFormat = "[h]:mm:ss"
+    End With
 Next i
-MsgBox "Masterfile Data Collection Completed - " & Now(), vbInformation, "Operation Status"
+Workbooks("2022-DataCollect").Save
+
+MsgBox "Data Collection Completed - " & Now(), vbInformation, "Masterfile Status"
 End Sub
