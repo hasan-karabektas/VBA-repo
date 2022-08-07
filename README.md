@@ -1,7 +1,6 @@
 # vba-repo 
-
-<br>
 <b>VB codes powering MS Office Suite tools</b>
+
 This repository contains codes written for tasks automation and fastening purposes, within the context of processing daily administrative and financial workloads, as well as contributing to periodical reporting, budget follow-up and account closings.
 
 <u><b>Deadline Notification</b></u>
