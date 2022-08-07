@@ -1,3 +1,4 @@
+Option Explicit
 Sub HideCompletedTasks()
 Dim Nr As Integer
 On Error GoTo err_handler
