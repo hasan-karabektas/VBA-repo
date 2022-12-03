@@ -1,0 +1,51 @@
+Sub Evolution()
+
+Application.DisplayAlerts = False
+Dim wb As Workbook, ws As Worksheet, i&, x&, y&, z&, v&, u&, Dd$
+
+For i = 1 To ActiveWorkbook.Worksheets.Count
+If Sheets(i).Name = "Data_Centralization" Then
+Sheets(i).Delete
+End If
+Next
+
+Set wb = Workbooks("Staff_Structure")
+wb.Worksheets.Add After:=Sheets(Sheets.Count)
+Worksheets(Sheets.Count).Name = "Data_Centralization"
+Set ws = wb.Worksheets("Data_Centralization")
+
+For i = 1 To ActiveWorkbook.Worksheets.Count
+Worksheets(i).Select
+    If Worksheets(i).Name <> "Data_Centralization" Then
+    Worksheets(i).ListObjects(1).HeaderRowRange.Copy
+    ws.Range("a1").PasteSpecial Paste:=xlPasteValues
+    y = ws.Cells(1, Columns.Count).End(xlToLeft).Column + 1
+    ws.Cells(1, y).Value = "Date"
+        Exit For
+    End If
+Next
+
+On Error GoTo err_res
+For i = 1 To ActiveWorkbook.Worksheets.Count
+    If Worksheets(i).Name <> "Data_Centralization" Then
+    Worksheets(i).Select
+    Worksheets(i).ListObjects(1).DataBodyRange.Copy
+    x = ws.Cells(Rows.Count, 1).End(xlUp).Row + 1
+    ws.Range("a" & x).PasteSpecial Paste:=xlPasteValues
+    v = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    z = ws.Cells(Rows.Count, 9).End(xlUp).Row + 1
+    Dd = Worksheets(i).Name
+    ws.Range("i" & z & ":" & "i" & v).Value = Dd
+    End If
+Next
+err_res:
+    ws.Select
+    u = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    ws.ListObjects.Add(xlSrcRange, Range("$A$1:$I$" & u), , xlYes).Name = "Evolution"
+Application.CutCopyMode = False
+MsgBox "Data Consolitation is finalized - " & Now(), vbInformation
+
+Set ws = Nothing
+Set wb = Nothing 
+
+End Sub
